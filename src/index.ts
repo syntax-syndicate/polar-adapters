@@ -1,9 +1,9 @@
 import { Polar } from "@polar-sh/sdk";
-import { type NextRequest, NextResponse } from "next/server";
 import {
-	validateEvent,
 	WebhookVerificationError,
+	validateEvent,
 } from "@polar-sh/sdk/webhooks";
+import { type NextRequest, NextResponse } from "next/server";
 
 export interface CheckoutConfig {
 	accessToken?: string;
