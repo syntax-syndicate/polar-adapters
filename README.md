@@ -18,6 +18,8 @@ export const GET = Checkout({
 });
 ```
 
+Pass a query param to this route with the productId. `?productId=xxx`.
+
 ## Webhooks
 
 A simple utility which resolves incoming webhook payloads by signing the webhook secret properly.
