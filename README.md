@@ -19,3 +19,17 @@ export const GET = Checkout({
 ## Webhooks
 
 A simple utility which resolves incoming webhook payloads by signing the webhook secret properly.
+
+```typescript
+// api/webhook/polar/route.ts
+import { Webhooks } from "@polar-sh/nextjs";
+
+export const POST = Webhooks({
+	webhookSecret: process.env.POLAR_WEBHOOK_SECRET!,
+	onPayload: async (payload) => {
+		// Handle the payload
+
+        // No need to return an acknowledge response, just resolve this Promise
+	}
+});
+```
