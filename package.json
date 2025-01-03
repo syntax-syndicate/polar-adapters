@@ -1,0 +1,55 @@
+{
+	"name": "@polar-sh/nextjs",
+	"version": "0.1.0",
+	"license": "Apache-2.0",
+	"bin": "dist/index.js",
+	"type": "module",
+	"engines": {
+		"node": ">=16"
+	},
+	"scripts": {
+		"build": "tsup ./src/index.ts --format esm",
+		"dev": "tsc --watch",
+		"test": "prettier --check . && xo && ava",
+		"check": "biome check --write ./src"
+	},
+	"files": [
+		"dist"
+	],
+	"dependencies": {
+		"@polar-sh/sdk": "^0.20.0",
+		"@sindresorhus/tsconfig": "^7.0.0",
+		"standardwebhooks": "1.0.0",
+		"tsup": "^8.3.5"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "1.9.4",
+		"@vdemedes/prettier-config": "^2.0.1",
+		"eslint-config-xo-react": "^0.27.0",
+		"eslint-plugin-react": "^7.32.2",
+		"eslint-plugin-react-hooks": "^4.6.0",
+		"next": "^15.1.3",
+		"prettier": "^2.8.7",
+		"typescript": "^5.7.2"
+	},
+	"ava": {
+		"extensions": {
+			"ts": "module",
+			"tsx": "module"
+		},
+		"nodeArguments": [
+			"--loader=ts-node/esm"
+		]
+	},
+	"xo": {
+		"extends": "xo-react",
+		"prettier": true,
+		"rules": {
+			"react/prop-types": "off"
+		}
+	},
+	"prettier": "@vdemedes/prettier-config",
+	"peerDependencies": {
+		"next": "^15.1.3"
+	}
+}
