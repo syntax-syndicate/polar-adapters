@@ -3,7 +3,9 @@
 	"compilerOptions": {
 		"outDir": "dist",
 		"skipLibCheck": true,
-		"declaration": true
+		"declaration": true,
+		"module": "esnext",
+		"moduleResolution": "node"
 	},
 	"include": ["src"]
 }
