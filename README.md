@@ -2,6 +2,8 @@
 
 Payments and Checkouts made dead simple with Next.js.
 
+`pnpm install @polar-sh/nextjs`
+
 ## Checkout
 
 Create a Checkout handler which takes care of redirections.
