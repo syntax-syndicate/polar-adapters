@@ -9,7 +9,7 @@ export interface CheckoutConfig {
 	accessToken?: string;
 	successUrl?: string;
 	includeCheckoutId?: boolean;
-	server?: 'sandbox' | 'production'
+	server?: 'sandbox' | 'production';
 }
 
 export const Checkout = ({
