@@ -9,15 +9,18 @@ export interface CheckoutConfig {
 	accessToken?: string;
 	successUrl?: string;
 	includeCheckoutId?: boolean;
+	server?: 'sandbox' | 'production'
 }
 
 export const Checkout = ({
 	accessToken,
 	successUrl,
+	server,
 	includeCheckoutId = true,
 }: CheckoutConfig) => {
 	const polar = new Polar({
 		accessToken,
+		server
 	});
 
 	return async (req: NextRequest) => {
