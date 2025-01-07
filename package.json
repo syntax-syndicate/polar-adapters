@@ -1,11 +1,12 @@
 {
-  "name": "polar-adapters",
+  "name": "@polar-sh/adapters",
   "private": true,
   "scripts": {
     "build": "turbo build",
     "dev": "turbo dev",
     "lint": "turbo lint",
-    "format": "prettier --write \"**/*.{ts,tsx,md}\""
+    "format": "prettier --write \"**/*.{ts,tsx,md}\"",
+    "check": "turbo check"
   },
   "devDependencies": {
     "prettier": "^3.2.5",
