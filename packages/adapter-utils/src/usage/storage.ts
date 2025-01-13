@@ -11,12 +11,10 @@ interface StorageMeterContext extends MeterContext {
 type Uploader = typeof put;
 export class StorageMeter<TRequest> {
     private meter: Meter<StorageMeterContext>;
-    private client: Uploader;
     private customerContext: CustomerContext<TRequest>;
 
-    constructor(customerContext: CustomerContext<TRequest>, client: Uploader) {
+    constructor(customerContext: CustomerContext<TRequest>) {
         this.customerContext = customerContext;
-        this.client = client;
         this.meter = new Meter<StorageMeterContext>();
     }
 
@@ -31,16 +29,16 @@ export class StorageMeter<TRequest> {
 
     public handler<TResponse>(callback: (req: TRequest, res: TResponse, client: Uploader) => Promise<TResponse>) {
         return async (req: TRequest, res: TResponse) => {
-            const client = await this.wrapClient(this.client, req);
+            const client = await this.wrapClient(req);
             
             return callback(req, res, client);
         }
     }
 
-    private async wrapClient(client: Uploader, req: TRequest): Promise<Uploader> {
+    private async wrapClient(req: TRequest): Promise<Uploader> {
         const meter = await this.createMeterHandler();
 
-        return this.createMeteredPut(meter, this.customerContext);
+        return this.createMeteredPut(meter, req);
     }
 
     private async createMeterHandler() {
@@ -49,7 +47,7 @@ export class StorageMeter<TRequest> {
 		};
 	}
 
-    private createMeteredPut(meter: (context: StorageMeterContext) => Promise<void>, customerContext: CustomerContext<any>): typeof put {
+    private createMeteredPut(meter: (context: StorageMeterContext) => Promise<void>, req: TRequest): typeof put {
         return async (pathname, body, optionsInput) => {
             const transformStream = new TransformStream<Uint8Array, Uint8Array>({
                 transform: async (chunk, controller) => {
@@ -57,8 +55,9 @@ export class StorageMeter<TRequest> {
                         usage: {
                             bytes: chunk.length,
                         },
-                        customerId: (await customerContext.getCustomerId?.(optionsInput)) ?? "",
+                        customerId: (await this.customerContext.getCustomerId?.(req)) ?? "",
                     });
+
                     controller.enqueue(chunk);
                 },
             });

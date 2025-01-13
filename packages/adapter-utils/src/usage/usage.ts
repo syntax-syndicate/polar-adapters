@@ -22,7 +22,7 @@ export class CustomerContext<TRequest> {
 		return new LLMMeter<TRequest>(this, model);
 	}
 
-    public storage(client: typeof put) {
-        return new StorageMeter<TRequest>(this, client);
+    public storage() {
+        return new StorageMeter<TRequest>(this);
     }
 }
