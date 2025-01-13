@@ -51,6 +51,7 @@ export class StorageMeter<TRequest> {
         return async (pathname, body, optionsInput) => {
             const transformStream = new TransformStream<Uint8Array, Uint8Array>({
                 transform: async (chunk, controller) => {
+                    console.log('chunk length', chunk.length)
                     await meter({
                         usage: {
                             bytes: chunk.length,
