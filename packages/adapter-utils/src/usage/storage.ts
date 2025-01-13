@@ -1,4 +1,4 @@
-import { createMultipartUploader } from "@vercel/blob";
+import { put } from "@vercel/blob";
 import { Meter, MeterContext } from "./meter";
 import { CustomerContext } from "./usage";
 
@@ -8,8 +8,7 @@ interface StorageMeterContext extends MeterContext {
 	};
 }
 
-type Uploader = Awaited<ReturnType<typeof createMultipartUploader>>;
-
+type Uploader = typeof put;
 export class StorageMeter<TRequest> {
     private meter: Meter<StorageMeterContext>;
     private client: Uploader;
@@ -38,49 +37,10 @@ export class StorageMeter<TRequest> {
         }
     }
 
-    public async wrapClient(client: Uploader, req: TRequest): Promise<Uploader> {
+    private async wrapClient(client: Uploader, req: TRequest): Promise<Uploader> {
         const meter = await this.createMeterHandler();
 
-        const wrappedClient: Uploader = {
-            ...client,
-            uploadPart: async (partNumber, body) => {   
-
-
-
-
-                const transformStream = new TransformStream<
-				Buffer,
-				Buffer
-			>({
-				transform: async (chunk, controller) => {
-					await meter({
-						usage: {
-							bytes: chunk.length,
-						},
-						customerId: (await this.customerContext.getCustomerId?.(req)) ?? "",
-					});
-
-					controller.enqueue(chunk);
-				},
-			});
-
-                const stream = body.pipeThrough(transformStream);
-
-
-                const result = await client.uploadPart(partNumber, stream);
-
-                await meter({
-                    usage: {
-                        bytes: result.size,
-                    },
-                    customerId: await this.customerContext.getCustomerId?.(req) ?? "",
-                });
-
-                return result;
-            },
-        }
-
-        return wrappedClient;
+        return this.createMeteredPut(meter, this.customerContext);
     }
 
     private async createMeterHandler() {
@@ -88,4 +48,35 @@ export class StorageMeter<TRequest> {
 			await this.meter.run(context);
 		};
 	}
+
+    private createMeteredPut(meter: (context: StorageMeterContext) => Promise<void>, customerContext: CustomerContext<any>): typeof put {
+        return async (pathname, body, optionsInput) => {
+            const transformStream = new TransformStream<Uint8Array, Uint8Array>({
+                transform: async (chunk, controller) => {
+                    await meter({
+                        usage: {
+                            bytes: chunk.length,
+                        },
+                        customerId: (await customerContext.getCustomerId?.(optionsInput)) ?? "",
+                    });
+                    controller.enqueue(chunk);
+                },
+            });
+
+            const meteredBody = body instanceof ReadableStream
+                ? body.pipeThrough(transformStream)
+                : new ReadableStream({
+                    start(controller) {
+                        if (body instanceof Uint8Array) {
+                            controller.enqueue(body);
+                        } else if (typeof body === 'string') {
+                            controller.enqueue(new TextEncoder().encode(body));
+                        }
+                        controller.close();
+                    }
+                }).pipeThrough(transformStream);
+
+            return put(pathname, meteredBody, optionsInput);
+        };
+    }
 }
