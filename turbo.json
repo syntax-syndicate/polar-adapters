@@ -18,7 +18,8 @@
       "persistent": true
     },
     "check": {
-      "dependsOn": ["lint", "check-types"]
+      "dependsOn": ["lint", "check-types"],
+      "cache": false
     },
     "ci": {
       "dependsOn": ["check", "build"]

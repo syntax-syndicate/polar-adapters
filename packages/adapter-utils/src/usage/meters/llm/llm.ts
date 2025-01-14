@@ -3,12 +3,12 @@ import type {
 	LanguageModelV1CallOptions,
 	LanguageModelV1StreamPart,
 } from "@ai-sdk/provider";
-import { Meter, type MeterContext } from "../meter/meter";
 import {
-	experimental_wrapLanguageModel as wrapLanguageModel,
 	type Experimental_LanguageModelV1Middleware as LanguageModelV1Middleware,
+	experimental_wrapLanguageModel as wrapLanguageModel,
 } from "ai";
-import { CustomerResolver } from "../customer/customer";
+import type { CustomerResolver } from "../../core/customer/customer";
+import { Meter, type MeterContext } from "../../core/meter/meter";
 
 type Handler<TRequest, TResponse> = (
 	req: TRequest,
@@ -30,7 +30,10 @@ export class LLMMeter<TRequest> {
 	/** The customer resolver */
 	private customerContext: CustomerResolver<TRequest>;
 
-	constructor(customerContext: CustomerResolver<TRequest>, model: LanguageModelV1) {
+	constructor(
+		customerContext: CustomerResolver<TRequest>,
+		model: LanguageModelV1,
+	) {
 		this.customerContext = customerContext;
 		this.model = model;
 		this.meter = new Meter<LLMMeterContext>();
@@ -144,7 +147,8 @@ export class LLMMeter<TRequest> {
 					if (chunk.type === "finish") {
 						await meter({
 							usage: chunk.usage,
-							customerId: (await this.customerContext.getCustomerId?.(req)) ?? "",
+							customerId:
+								(await this.customerContext.getCustomerId?.(req)) ?? "",
 						});
 					}
 

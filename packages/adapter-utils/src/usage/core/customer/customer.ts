@@ -1,14 +1,14 @@
-import { LanguageModelV1 } from "@ai-sdk/provider";
-import { LLMMeter } from "../llm/llm";
-import { StorageMeter } from "../storage/storage";
+import type { LanguageModelV1 } from "@ai-sdk/provider";
+import { LLMMeter } from "../../meters/llm/llm";
+import { StorageMeter } from "../../meters/storage/storage";
 
 export class CustomerResolver<TRequest> {
 	/** The customer ID resolver */
 	public getCustomerId?: (req: TRequest) => Promise<string> | undefined;
 
-    constructor(getCustomerId: (req: TRequest) => Promise<string>) {
-        this.getCustomerId = getCustomerId;
-    }
+	constructor(getCustomerId: (req: TRequest) => Promise<string>) {
+		this.getCustomerId = getCustomerId;
+	}
 
 	/**
 	 * Creates a language model meter tied to the customer.

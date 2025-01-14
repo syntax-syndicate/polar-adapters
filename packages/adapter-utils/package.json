@@ -18,7 +18,8 @@
   },
   "scripts": {
     "build": "tsup src/index.ts --format esm,cjs --dts --outDir dist",
-    "test": "vitest"
+    "test": "vitest",
+    "check": "biome check --write ./src"
   },
   "keywords": [],
   "author": "",
@@ -28,6 +29,7 @@
   },
   "devDependencies": {
     "@ai-sdk/provider": "^1.0.4",
+    "@biomejs/biome": "1.9.4",
     "@sindresorhus/tsconfig": "^7.0.0",
     "@vercel/blob": "^0.27.0",
     "ai": "^4.0.34",
