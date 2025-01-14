@@ -3,12 +3,12 @@ import type {
 	LanguageModelV1CallOptions,
 	LanguageModelV1StreamPart,
 } from "@ai-sdk/provider";
-import { Meter, type MeterContext } from "./meter";
+import { Meter, type MeterContext } from "../meter/meter";
 import {
 	experimental_wrapLanguageModel as wrapLanguageModel,
 	type Experimental_LanguageModelV1Middleware as LanguageModelV1Middleware,
 } from "ai";
-import { CustomerContext } from "./usage";
+import { CustomerResolver } from "../customer/customer";
 
 type Handler<TRequest, TResponse> = (
 	req: TRequest,
@@ -23,16 +23,25 @@ interface LLMMeterContext extends MeterContext {
 }
 
 export class LLMMeter<TRequest> {
+	/** The language model */
 	private model: LanguageModelV1;
+	/** The meter for the language model */
 	private meter: Meter<LLMMeterContext>;
-	private customerContext: CustomerContext<TRequest>;
+	/** The customer resolver */
+	private customerContext: CustomerResolver<TRequest>;
 
-	constructor(customerContext: CustomerContext<TRequest>, model: LanguageModelV1) {
+	constructor(customerContext: CustomerResolver<TRequest>, model: LanguageModelV1) {
 		this.customerContext = customerContext;
 		this.model = model;
 		this.meter = new Meter<LLMMeterContext>();
 	}
 
+	/**
+	 * Increments the usage for a specific meter.
+	 * @param meter - The name of the meter to increment.
+	 * @param transformer - A function that transforms the meter context into a number.
+	 * @returns The meter instance.
+	 */
 	public increment(
 		meter: string,
 		transformer: (ctx: LLMMeterContext) => number,
@@ -42,6 +51,11 @@ export class LLMMeter<TRequest> {
 		return this;
 	}
 
+	/**
+	 * Creates a handler function for the target framework
+	 * @param callback - The callback function to wrap.
+	 * @returns The wrapped handler function.
+	 */
 	public handler<TResponse>(
 		callback: (
 			req: TRequest,
@@ -59,6 +73,11 @@ export class LLMMeter<TRequest> {
 		};
 	}
 
+	/**
+	 * Creates a middleware object for the language model.
+	 * @param req - The request object.
+	 * @returns The middleware object.
+	 */
 	private async middleware(req: TRequest): Promise<LanguageModelV1Middleware> {
 		const meter = await this.createMeterHandler();
 
@@ -74,6 +93,12 @@ export class LLMMeter<TRequest> {
 		};
 	}
 
+	/**
+	 * Wraps the generate function to increment the usage meter.
+	 * @param meter - The meter function to increment.
+	 * @param req - The request object.
+	 * @returns The wrapped generate function.
+	 */
 	private wrapGenerate(
 		meter: (context: LLMMeterContext) => Promise<void>,
 		req: TRequest,
@@ -94,18 +119,20 @@ export class LLMMeter<TRequest> {
 		};
 	}
 
+	/**
+	 * Wraps the stream function to increment the usage meter for each chunk.
+	 * @param meter - The meter function to increment.
+	 * @param req - The request object.
+	 * @returns The wrapped stream function.
+	 */
 	private wrapStream(
 		meter: (context: LLMMeterContext) => Promise<void>,
 		req: TRequest,
 	) {
 		return async ({
 			doStream,
-			params,
-			model,
 		}: {
 			doStream: () => ReturnType<LanguageModelV1["doStream"]>;
-			params: LanguageModelV1CallOptions;
-			model: LanguageModelV1;
 		}) => {
 			const { stream, ...rest } = await doStream();
 

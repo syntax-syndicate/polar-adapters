@@ -1,26 +1,6 @@
-import { LanguageModelV1 } from "@ai-sdk/provider";
-import { LLMMeter } from "./llm";
-import { StorageMeter } from './storage';
+import { CustomerResolver } from "./customer/customer";
 
-export class Usage<TRequest> {
-	public customer(callback: (req: TRequest) => Promise<string>) {
-		return new CustomerContext<TRequest>(callback);
-	}
+export const Usage = <TRequest>(getCustomerId: (req: TRequest) => Promise<string>) => {
+	return new CustomerResolver<TRequest>(getCustomerId);
 }
 
-
-export class CustomerContext<TRequest> {
-	public getCustomerId?: (req: TRequest) => Promise<string> | undefined;
-
-    constructor(getCustomerId: (req: TRequest) => Promise<string>) {
-        this.getCustomerId = getCustomerId;
-    }
-
-	public model(model: LanguageModelV1) {
-		return new LLMMeter<TRequest>(this, model);
-	}
-
-    public storage() {
-        return new StorageMeter<TRequest>(this);
-    }
-}

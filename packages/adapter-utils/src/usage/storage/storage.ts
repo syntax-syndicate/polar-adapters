@@ -1,6 +1,6 @@
 import { put } from "@vercel/blob";
-import { Meter, MeterContext } from "./meter";
-import { CustomerContext } from "./usage";
+import { Meter, MeterContext } from "../meter/meter";
+import { CustomerResolver } from "../customer/customer";
 
 interface StorageMeterContext extends MeterContext {
 	usage: {
@@ -10,14 +10,22 @@ interface StorageMeterContext extends MeterContext {
 
 type Uploader = typeof put;
 export class StorageMeter<TRequest> {
+	/** The meter for the storage meter */
     private meter: Meter<StorageMeterContext>;
-    private customerContext: CustomerContext<TRequest>;
+	/** The customer resolver */
+    private customerContext: CustomerResolver<TRequest>;
 
-    constructor(customerContext: CustomerContext<TRequest>) {
+    constructor(customerContext: CustomerResolver<TRequest>) {
         this.customerContext = customerContext;
         this.meter = new Meter<StorageMeterContext>();
     }
 
+	/**
+	 * Increments the usage meter for a specific meter.
+	 * @param meter - The name of the meter to increment.
+	 * @param transformer - A function that transforms the meter context into a number.
+	 * @returns The meter instance.
+	 */
     public increment(
 		meter: string,
 		transformer: (ctx: StorageMeterContext) => number,
@@ -27,6 +35,11 @@ export class StorageMeter<TRequest> {
 		return this;
 	}
 
+    /**
+     * Creates a handler for a specific framework
+     * @param callback - The callback function to wrap.
+     * @returns The wrapped handler function.
+     */
     public handler<TResponse>(callback: (req: TRequest, res: TResponse, client: Uploader) => Promise<TResponse>) {
         return async (req: TRequest, res: TResponse) => {
             const client = await this.wrapClient(req);
@@ -35,23 +48,37 @@ export class StorageMeter<TRequest> {
         }
     }
 
+    /**
+     * Wraps the client to increment the usage meter.
+     * @param req - The request object.
+     * @returns The wrapped client.
+     */
     private async wrapClient(req: TRequest): Promise<Uploader> {
         const meter = await this.createMeterHandler();
 
         return this.createMeteredPut(meter, req);
     }
 
+    /**
+     * Creates a meter handler for the storage meter.
+     * @returns The meter handler.
+     */
     private async createMeterHandler() {
 		return async (context: StorageMeterContext) => {
 			await this.meter.run(context);
 		};
 	}
 
+    /**
+     * Creates a metered put function.
+     * @param meter - The meter function to increment.
+     * @param req - The request object.
+     * @returns The metered put function.
+     */
     private createMeteredPut(meter: (context: StorageMeterContext) => Promise<void>, req: TRequest): typeof put {
         return async (pathname, body, optionsInput) => {
             const transformStream = new TransformStream<Uint8Array, Uint8Array>({
                 transform: async (chunk, controller) => {
-                    console.log('chunk length', chunk.length)
                     await meter({
                         usage: {
                             bytes: chunk.length,
