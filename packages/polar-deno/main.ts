@@ -1,12 +1,12 @@
 import {
 	type WebhooksConfig,
 	handleWebhookPayload,
-} from "npm:@polar-sh/adapter-utils";
-import { Polar } from "npm:@polar-sh/sdk";
+} from "npm:@polar-sh/adapter-utils@0.1.1";
+import { Polar } from "npm:@polar-sh/sdk@0.20.2";
 import {
 	WebhookVerificationError,
 	validateEvent,
-} from "npm:@polar-sh/sdk/webhooks/index.js";
+} from "npm:@polar-sh/sdk@0.20.2/webhooks/index.js";
 
 export interface CheckoutConfig {
 	accessToken?: string;
@@ -20,7 +20,7 @@ export const Checkout = ({
 	successUrl,
 	server,
 	includeCheckoutId = true,
-}: CheckoutConfig) => {
+}: CheckoutConfig): Deno.ServeHandler => {
 	const polar = new Polar({
 		accessToken: accessToken ?? Deno.env.get("POLAR_ACCESS_TOKEN"),
 		server,
@@ -92,7 +92,7 @@ export const CustomerPortal = ({
 	accessToken,
 	server,
 	getCustomerId,
-}: CustomerPortalConfig) => {
+}: CustomerPortalConfig): Deno.ServeHandler => {
 	const polar = new Polar({
 		accessToken: accessToken ?? Deno.env.get("POLAR_ACCESS_TOKEN"),
 		server,
@@ -128,7 +128,7 @@ export const Webhooks = ({
 	webhookSecret,
 	onPayload,
 	...eventHandlers
-}: WebhooksConfig) => {
+}: WebhooksConfig): Deno.ServeHandler => {
 	return async (request: Request) => {
 		const requestBody = await request.text();
 
