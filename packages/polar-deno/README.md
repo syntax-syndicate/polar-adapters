@@ -7,7 +7,7 @@ Payments and Checkouts made dead simple with Deno.
 Create a Checkout handler which takes care of redirections.
 
 ```typescript
-import { Checkout } from "https://raw.githubusercontent.com/polarsource/polar-adapters/refs/heads/main/packages/polar-deno/main.ts";
+import { Checkout } from "jsr:@polar-sh/deno";
 
 Deno.serve(
   Checkout({ accessToken: 'xxx' }),
@@ -29,7 +29,7 @@ Pass query params to this route.
 Create a customer portal where your customer can view orders and subscriptions.
 
 ```typescript
-import { CustomerPortal } from "https://raw.githubusercontent.com/polarsource/polar-adapters/refs/heads/main/packages/polar-deno/main.ts";
+import { CustomerPortal } from "jsr:@polar-sh/deno";
 
 Deno.serve(
     CustomerPortal({
@@ -45,7 +45,7 @@ Deno.serve(
 A simple utility which resolves incoming webhook payloads by signing the webhook secret properly.
 
 ```typescript
-import { Webhooks } from "https://raw.githubusercontent.com/polarsource/polar-adapters/refs/heads/main/packages/polar-deno/main.ts";
+import { Webhooks } from "jsr:@polar-sh/deno";
 
 Deno.serve(
     Webhooks({
