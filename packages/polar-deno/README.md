@@ -1,0 +1,77 @@
+# @polar-sh/deno
+
+Payments and Checkouts made dead simple with Deno.
+
+## Checkout
+
+Create a Checkout handler which takes care of redirections.
+
+```typescript
+import { Checkout } from "https://raw.githubusercontent.com/polarsource/polar-adapters/refs/heads/main/packages/polar-deno/main.ts";
+
+Deno.serve(
+  Checkout({ accessToken: 'xxx' }),
+);
+```
+
+### Query Params
+
+Pass query params to this route.
+
+- productId (or productPriceId) `?productId=xxx`
+- productPriceId (or productId) `?productPriceId=xxx`
+- customerId (optional) `?productId=xxx&customerId=xxx`
+- customerEmail (optional) `?productId=xxx&customerEmail=janedoe@gmail.com`
+- customerName (optional) `?productId=xxx&customerName=Jane`
+
+## Customer Portal
+
+Create a customer portal where your customer can view orders and subscriptions.
+
+```typescript
+import { CustomerPortal } from "https://raw.githubusercontent.com/polarsource/polar-adapters/refs/heads/main/packages/polar-deno/main.ts";
+
+Deno.serve(
+    CustomerPortal({
+        accessToken: "xxx",
+        getCustomerId: (req) => "",
+        server: "sandbox"
+    })
+);
+```
+
+## Webhooks
+
+A simple utility which resolves incoming webhook payloads by signing the webhook secret properly.
+
+```typescript
+import { Webhooks } from "https://raw.githubusercontent.com/polarsource/polar-adapters/refs/heads/main/packages/polar-deno/main.ts";
+
+Deno.serve(
+    Webhooks({
+        webhookSecret: Deno.env.get('POLAR_WEBHOOK_SECRET'),
+        onPayload: async (payload) => /** Handle payload */,
+    })
+);
+```
+
+#### Payload Handlers
+
+The Webhook handler also supports granular handlers for easy integration.
+
+- onCheckoutCreated: (payload) =>
+- onCheckoutUpdated: (payload) =>
+- onOrderCreated: (payload) =>
+- onSubscriptionCreated: (payload) =>
+- onSubscriptionUpdated: (payload) =>
+- onSubscriptionActive: (payload) =>
+- onSubscriptionCanceled: (payload) =>
+- onSubscriptionRevoked: (payload) =>
+- onProductCreated: (payload) =>
+- onProductUpdated: (payload) =>
+- onOrganizationUpdated: (payload) =>
+- onBenefitCreated: (payload) =>
+- onBenefitUpdated: (payload) =>
+- onBenefitGrantCreated: (payload) =>
+- onBenefitGrantUpdated: (payload) =>
+- onBenefitGrantRevoked: (payload) =>

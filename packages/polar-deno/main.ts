@@ -74,13 +74,10 @@ export const Checkout = ({
 			return Response.redirect(result.url);
 		} catch (error) {
 			console.error(error);
-			return new Response(
-				JSON.stringify({ error: "Internal server error" }),
-				{
-					status: 500,
-					headers: { "Content-Type": "application/json" },
-				},
-			);
+			return new Response(JSON.stringify({ error: "Internal server error" }), {
+				status: 500,
+				headers: { "Content-Type": "application/json" },
+			});
 		}
 	};
 };
@@ -105,13 +102,10 @@ export const CustomerPortal = ({
 		const customerId = await getCustomerId(request);
 
 		if (!customerId) {
-			return new Response(
-				JSON.stringify({ error: "customerId not defined" }),
-				{
-					status: 400,
-					headers: { "Content-Type": "application/json" },
-				},
-			);
+			return new Response(JSON.stringify({ error: "customerId not defined" }), {
+				status: 400,
+				headers: { "Content-Type": "application/json" },
+			});
 		}
 
 		try {
@@ -122,13 +116,10 @@ export const CustomerPortal = ({
 			return Response.redirect(result.customerPortalUrl);
 		} catch (error) {
 			console.error(error);
-			return new Response(
-				JSON.stringify({ error: "Internal server error" }),
-				{
-					status: 500,
-					headers: { "Content-Type": "application/json" },
-				},
-			);
+			return new Response(JSON.stringify({ error: "Internal server error" }), {
+				status: 500,
+				headers: { "Content-Type": "application/json" },
+			});
 		}
 	};
 };
@@ -155,15 +146,12 @@ export const Webhooks = ({
 				webhookSecret,
 			);
 		} catch (error) {
-			console.log(error)
+			console.log(error);
 			if (error instanceof WebhookVerificationError) {
-				return new Response(
-					JSON.stringify({ received: false }),
-					{
-						status: 403,
-						headers: { "Content-Type": "application/json" },
-					},
-				);
+				return new Response(JSON.stringify({ received: false }), {
+					status: 403,
+					headers: { "Content-Type": "application/json" },
+				});
 			}
 
 			throw error;
@@ -175,11 +163,8 @@ export const Webhooks = ({
 			...eventHandlers,
 		});
 
-		return new Response(
-			JSON.stringify({ received: true }),
-			{
-				headers: { "Content-Type": "application/json" },
-			},
-		);
+		return new Response(JSON.stringify({ received: true }), {
+			headers: { "Content-Type": "application/json" },
+		});
 	};
 };
